@@ -9,4 +9,6 @@ package com.job.betterjob.constant;
 public class JobRedisKey {
 
     public static final String JOB_INFO = "better:job:jobinfo";
+
+    public static final String JOB_INFO_LOCK = "better:job:jobLock:";
 }

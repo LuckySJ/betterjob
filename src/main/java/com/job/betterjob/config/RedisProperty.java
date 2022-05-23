@@ -16,6 +16,6 @@ import org.springframework.context.annotation.Configuration;
 public class RedisProperty {
     private String host;
     private int port;
-    private int timeout = 2000;
+    private int timeout = 100;
     private int database;
 }

@@ -4,14 +4,17 @@ import com.alibaba.fastjson.JSONObject;
 import com.job.betterjob.constant.JobRedisKey;
 import com.job.betterjob.constant.JobStatus;
 import com.job.betterjob.model.JobInfo;
-import com.job.betterjob.util.CronExpression;
+import com.job.betterjob.thread.ExecuteThread;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.support.CronExpression;
 
 import java.net.InetAddress;
 import java.text.ParseException;
-import java.util.Date;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.*;
 
 /**
  * @author songle
@@ -27,6 +30,8 @@ public class ExecutorHandler {
     private String serverName;
     @Getter
     private final String executorId;
+
+    public static final Map<String, ExecuteThread> CURRENT_EXECUTING_THREADS_REPOSITORY = new HashMap<>();
 
     @SneakyThrows
     public ExecutorHandler(String serverName, JedisHandler jedisHandler){
@@ -51,7 +56,7 @@ public class ExecutorHandler {
             JobInfo job = loadJobInfo(jobInfo.getName());
             if (job == null || job.getVersion() < jobInfo.getVersion()) {
                 // 刷新下次任务的执行时间
-                refreshNextExecuteTime(jobInfo,new Date());
+                refreshNextExecuteTime(jobInfo,LocalDateTime.now());
                 // 注册任务到redis
                 return updateJobInfo(jobInfo);
         }else {
@@ -75,7 +80,7 @@ public class ExecutorHandler {
      */
     private boolean updateJobInfo(JobInfo jobInfo) {
         try {
-            jedisHandler.set(JobRedisKey.JOB_INFO + ":" + jobInfo.getName(),JSONObject.toJSONStringWithDateFormat(jobInfo,"yyyy-MM-dd HH:mm:ss"));
+            jedisHandler.hashSet(JobRedisKey.JOB_INFO,jobInfo.getName(),JSONObject.toJSONStringWithDateFormat(jobInfo,"yyyy-MM-dd HH:mm:ss"));
             return true;
         } catch (Exception e){
             log.error("注册任务到redis异常:{}",e);
@@ -91,10 +96,11 @@ public class ExecutorHandler {
      * @return jobInfo
      * @date    2022/5/22 21:50
      */
-    private JobInfo refreshNextExecuteTime(JobInfo jobInfo, Date fromTIme) throws ParseException {
-        Date nextValidTimeAfter = new CronExpression(jobInfo.getCron()).getNextValidTimeAfter(fromTIme);
+    private JobInfo refreshNextExecuteTime(JobInfo jobInfo, LocalDateTime fromTIme) throws ParseException {
+        CronExpression cronExpression = CronExpression.parse(jobInfo.getCron());
+        LocalDateTime nextValidTimeAfter = cronExpression.next(fromTIme);
         if (nextValidTimeAfter != null) {
-            jobInfo.setNextExcuteTime(nextValidTimeAfter);
+            jobInfo.setNextExcuteTime(Date.from(nextValidTimeAfter.atZone( ZoneId.systemDefault()).toInstant()));
         }else{
             jobInfo.setStatus(JobStatus.DISABLED);
             jobInfo.setNextExcuteTime(null);
@@ -112,11 +118,56 @@ public class ExecutorHandler {
      */
     private JobInfo loadJobInfo(String name) {
         try{
-            String jobInfo = jedisHandler.get(JobRedisKey.JOB_INFO + ":" + name);
-            return JSONObject.parseObject(jobInfo,JobInfo.class);
+            return jedisHandler.hashGet(JobRedisKey.JOB_INFO,name,JobInfo.class);
         } catch (Exception e){
             log.error("query job info error,cause:{}",e);
             return null;
         }
+    }
+
+
+    /**
+     * @description  查询所有的任务信息
+     *
+     */
+    public List<JobInfo> getAllJobInfo() {
+        try{
+            List<JobInfo> result = new ArrayList<>();
+            Map<String, JobInfo> jobInfoMap = jedisHandler.hashGetAll(JobRedisKey.JOB_INFO, JobInfo.class);
+            if (jobInfoMap != null) {
+                result = new ArrayList<>(jobInfoMap.values());
+            }
+            return result;
+        } catch (Exception e){
+            log.error("query job list info error,cause:{}",e);
+            return null;
+        }
+    }
+
+
+    /**
+     * @description  执行任务
+     *
+     */
+    public boolean executeJob(JobInfo jobInfo) {
+        String key = JobRedisKey.JOB_INFO_LOCK + jobInfo.getName();
+        try{
+            // 分布式锁
+            jedisHandler.set(key,executorId,"nx","ex",jobInfo.getTimeout());
+            if (executorId.equals(jedisHandler.get(JobRedisKey.JOB_INFO_LOCK + jobInfo.getName()))) {
+                ExecuteThread executeThread = new ExecuteThread(CommandHandler.COMMAND_REPOSITORY.get(jobInfo.getName()));
+                // 将当前执行线程任务交给线程池执行
+                CommandHandler.EXECUTOR_POOL.execute(executeThread);
+                // 刷新下次任务的执行时间
+                refreshNextExecuteTime(jobInfo,LocalDateTime.now());
+                return updateJobInfo(jobInfo);
+            }
+            return false;
+        }catch (Exception e) {
+            log.error("【{}】任务执行异常：{}",jobInfo.getName(),e);
+            jedisHandler.del(key);
+            return false;
+        }
+
     }
 }

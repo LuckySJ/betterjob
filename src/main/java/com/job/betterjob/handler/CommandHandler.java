@@ -2,8 +2,10 @@ package com.job.betterjob.handler;
 
 import com.job.betterjob.thread.RegisterThread;
 import com.job.betterjob.command.JobCommand;
+import com.job.betterjob.thread.ScheduledThread;
 
 import java.util.HashMap;
+import java.util.concurrent.*;
 
 /**
  * @author songle
@@ -21,10 +23,15 @@ public class CommandHandler {
     public static final HashMap<String,JobCommand> COMMAND_REPOSITORY = new HashMap<>();
 
     private RegisterThread registerThread;
+    private ScheduledThread scheduledThread;
+
+    public static final ExecutorService EXECUTOR_POOL = new ThreadPoolExecutor(3,8,0L,
+            TimeUnit.SECONDS,new LinkedBlockingDeque<>(),new ThreadPoolExecutor.AbortPolicy());
 
     public CommandHandler(ExecutorHandler executorHandler){
         this.executorHandler = executorHandler;
         startRegisterThread();
+        startScheduledThread();
     }
 
 
@@ -37,6 +44,17 @@ public class CommandHandler {
         this.registerThread = new RegisterThread(executorHandler);
         this.registerThread.setDaemon(true);
         this.registerThread.start();
+    }
+
+    /**
+     * @description  开启任务调度线程
+     *
+     * @param
+     */
+    private void startScheduledThread() {
+        this.scheduledThread = new ScheduledThread(executorHandler);
+        this.scheduledThread.setDaemon(true);
+        this.scheduledThread.start();
     }
 
 

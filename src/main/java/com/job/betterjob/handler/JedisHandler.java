@@ -1,11 +1,15 @@
 package com.job.betterjob.handler;
 
 
+import com.alibaba.fastjson.JSONObject;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author songle
@@ -64,11 +68,13 @@ public class JedisHandler {
      * @date    2022/5/22 17:29
      */
     public String get(String key) {
+        Jedis jedis = jedisPool.getResource();
         try {
-            Jedis jedis = jedisPool.getResource();
             return jedis.get(key);
         }catch (Exception e){
             log.error("jedis get info error,cause:{}",e);
+        }finally {
+            jedis.close();
         }
         return null;
     }
@@ -83,11 +89,13 @@ public class JedisHandler {
      * @date    2022/5/22 17:29
      */
     public String set(String key,String value) {
+        Jedis jedis = jedisPool.getResource();
         try {
-            Jedis jedis = jedisPool.getResource();
             return jedis.set(key,value);
         }catch (Exception e){
             log.error("jedis set info error,cause:{}",e);
+        }finally {
+            jedis.close();
         }
         return null;
     }
@@ -102,11 +110,13 @@ public class JedisHandler {
      * @date    2022/5/22 17:29
      */
     public String set(String key,String value,String nx,String ex,int time) {
+        Jedis jedis = jedisPool.getResource();
         try {
-            Jedis jedis = jedisPool.getResource();
             return jedis.set(key,value,nx,ex,time);
         }catch (Exception e){
             log.error("jedis set info error,cause:{}",e);
+        }finally {
+            jedis.close();
         }
         return null;
     }
@@ -121,11 +131,13 @@ public class JedisHandler {
      * @date    2022/5/22 17:29
      */
     public Long expire(String key,int seconds) {
+        Jedis jedis = jedisPool.getResource();
         try {
-            Jedis jedis = jedisPool.getResource();
             return jedis.expire(key,seconds);
         }catch (Exception e){
             log.error("jedis expire info error,cause:{}",e);
+        }finally {
+            jedis.close();
         }
         return null;
     }
@@ -140,13 +152,76 @@ public class JedisHandler {
      * @date    2022/5/22 17:29
      */
     public Long del(String key) {
+        Jedis jedis = jedisPool.getResource();
         try {
-            Jedis jedis = jedisPool.getResource();
             return jedis.del(key);
         }catch (Exception e){
             log.error("jedis delete info error,cause:{}",e);
+        }finally {
+            jedis.close();
         }
         return null;
+    }
+
+
+    /**
+     * @description 添加数据,hash
+     *
+     * @param  key
+     * @return void
+     */
+    public void hashSet(String parentKey,String key,String value) {
+        Jedis jedis = jedisPool.getResource();
+        try {
+            jedis.hset(parentKey,key,value);
+        }catch (Exception e){
+            log.error("jedis set info error,cause:{}",e);
+        }finally {
+            jedis.close();
+        }
+    }
+
+
+    /**
+     * @description 获取数据,hash
+     *
+     * @param  key
+     * @return void
+     */
+    public <T> T hashGet(String parentKey,String key,Class<T> tClass) {
+        Jedis jedis = jedisPool.getResource();
+        try {
+            return JSONObject.parseObject(jedis.hget(parentKey,key),tClass);
+        }catch (Exception e){
+            log.error("jedis hget info error,cause:{}",e);
+            return null;
+        }finally {
+            jedis.close();
+        }
+    }
+
+
+    /**
+     * @description 获取数据,hash
+     *
+     * @param  parentKey
+     * @return void
+     */
+    public <T> Map<String,T> hashGetAll(String parentKey, Class<T> tClass) {
+        Jedis jedis = jedisPool.getResource();
+        try {
+            Map<String, T> result = new HashMap<>();
+            Map<String, String> map = jedis.hgetAll(parentKey);
+            for (String key : map.keySet()) {
+                result.put(key,JSONObject.parseObject(map.get(key),tClass));
+            }
+            return result;
+        }catch (Exception e){
+            log.error("jedis hgetAll info error,cause:{}",e);
+            return null;
+        }finally {
+            jedis.close();
+        }
     }
 
 }
