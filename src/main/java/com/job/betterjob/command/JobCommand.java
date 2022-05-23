@@ -1,7 +1,7 @@
-package com.songle.betterjob.command;
+package com.job.betterjob.command;
 
-import com.songle.betterjob.model.JobInfo;
-import com.songle.betterjob.model.JobResult;
+import com.job.betterjob.model.JobResult;
+import com.job.betterjob.model.JobInfo;
 
 
 /**

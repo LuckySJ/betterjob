@@ -1,4 +1,4 @@
-package com.songle.betterjob.model;
+package com.job.betterjob.model;
 
 
 import lombok.AllArgsConstructor;

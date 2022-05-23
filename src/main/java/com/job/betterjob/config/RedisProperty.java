@@ -1,4 +1,4 @@
-package com.songle.betterjob.config;
+package com.job.betterjob.config;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;

@@ -1,9 +1,9 @@
-package com.songle.betterjob.command.impl;
+package com.job.betterjob.command.impl;
 
 
-import com.songle.betterjob.command.JobCommand;
-import com.songle.betterjob.model.JobInfo;
-import com.songle.betterjob.model.JobResult;
+import com.job.betterjob.model.JobResult;
+import com.job.betterjob.command.JobCommand;
+import com.job.betterjob.model.JobInfo;
 import lombok.AllArgsConstructor;
 
 import java.lang.reflect.Method;

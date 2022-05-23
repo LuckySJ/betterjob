@@ -1,6 +1,6 @@
-package com.songle.betterjob.job;
+package com.job.betterjob.job;
 
-import com.songle.betterjob.annotation.BetterJobCron;
+import com.job.betterjob.annotation.BetterJobCron;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 

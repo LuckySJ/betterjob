@@ -1,6 +1,6 @@
-package com.songle.betterjob.model;
+package com.job.betterjob.model;
 
-import com.songle.betterjob.annotation.BetterJobCron;
+import com.job.betterjob.annotation.BetterJobCron;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 

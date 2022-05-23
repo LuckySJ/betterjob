@@ -15,7 +15,7 @@
  *
  */
 
-package com.songle.betterjob.util;
+package com.job.betterjob.util;
 
 import java.io.Serializable;
 import java.text.ParseException;

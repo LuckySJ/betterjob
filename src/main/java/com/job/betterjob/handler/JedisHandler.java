@@ -1,4 +1,4 @@
-package com.songle.betterjob.handler;
+package com.job.betterjob.handler;
 
 
 import lombok.Data;

@@ -1,7 +1,7 @@
-package com.songle.betterjob.handler;
+package com.job.betterjob.handler;
 
-import com.songle.betterjob.command.JobCommand;
-import com.songle.betterjob.thread.RegisterThread;
+import com.job.betterjob.thread.RegisterThread;
+import com.job.betterjob.command.JobCommand;
 
 import java.util.HashMap;
 

@@ -1,8 +1,8 @@
-package com.songle.betterjob.config;
+package com.job.betterjob.config;
 
-import com.songle.betterjob.handler.CommandHandler;
-import com.songle.betterjob.handler.ExecutorHandler;
-import com.songle.betterjob.handler.JedisHandler;
+import com.job.betterjob.handler.CommandHandler;
+import com.job.betterjob.handler.ExecutorHandler;
+import com.job.betterjob.handler.JedisHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;

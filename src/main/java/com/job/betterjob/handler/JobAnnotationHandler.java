@@ -1,9 +1,9 @@
-package com.songle.betterjob.handler;
+package com.job.betterjob.handler;
 
 
-import com.songle.betterjob.annotation.BetterJobCron;
-import com.songle.betterjob.command.impl.AnnotationJobCommand;
-import com.songle.betterjob.model.JobInfo;
+import com.job.betterjob.annotation.BetterJobCron;
+import com.job.betterjob.command.impl.AnnotationJobCommand;
+import com.job.betterjob.model.JobInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.SmartInitializingSingleton;

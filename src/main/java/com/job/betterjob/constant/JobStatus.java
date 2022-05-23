@@ -1,4 +1,4 @@
-package com.songle.betterjob.constant;
+package com.job.betterjob.constant;
 
 /**
  * @author songle

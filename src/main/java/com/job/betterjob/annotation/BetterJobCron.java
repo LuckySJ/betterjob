@@ -1,8 +1,8 @@
-package com.songle.betterjob.annotation;
+package com.job.betterjob.annotation;
 
-import com.songle.betterjob.constant.JobStatus;
-import com.songle.betterjob.constant.NoticeStrategy;
-import com.songle.betterjob.constant.ReportStrategy;
+import com.job.betterjob.constant.NoticeStrategy;
+import com.job.betterjob.constant.JobStatus;
+import com.job.betterjob.constant.ReportStrategy;
 
 import java.lang.annotation.*;
 
