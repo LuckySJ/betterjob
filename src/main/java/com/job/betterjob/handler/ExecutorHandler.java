@@ -155,7 +155,7 @@ public class ExecutorHandler {
             // 分布式锁
             jedisHandler.set(key,executorId,"nx","ex",jobInfo.getTimeout());
             if (executorId.equals(jedisHandler.get(JobRedisKey.JOB_INFO_LOCK + jobInfo.getName()))) {
-                ExecuteThread executeThread = new ExecuteThread(CommandHandler.COMMAND_REPOSITORY.get(jobInfo.getName()));
+                ExecuteThread executeThread = new ExecuteThread(CommandHandler.COMMAND_REPOSITORY.get(jobInfo.getName()),jedisHandler);
                 // 将当前执行线程任务交给线程池执行
                 CommandHandler.EXECUTOR_POOL.execute(executeThread);
                 // 刷新下次任务的执行时间
